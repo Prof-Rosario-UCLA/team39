@@ -38,8 +38,9 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
     const googleId = claimsParser.getString("sub");
 	const username = claimsParser.getString("name");
-	const picture = claimsParser.getString("picture");
-	const email = claimsParser.getString("email");
+	// const picture = claimsParser.getString("picture");
+	// const email = claimsParser.getString("email");
+	console.log("claims: ", claims);
 
 	// TODO: Replace this with your own DB query.
 	const existingUser = await getUserFromGoogleId(googleId);
