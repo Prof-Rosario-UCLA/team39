@@ -1,5 +1,7 @@
 <script>
-	let { children } = $props();
+    import '../app.css';
+    
+    let { children } = $props();
 </script>
 <!-- 
 <head>
@@ -9,17 +11,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head> -->
 
-<nav>
+<nav class="flex justify-around p-2">
     <div>
-        <h1>CountryGUESSR</h1>
+        <a href="/" class="text-green-800 text-2xl">CountryGUESSR</a>
+    </div>
+     <div class="wide-menu">
+                <a href="/profile" class="underline">Profile</a>
     </div>
 </nav>
 
+<section id="center-screen" class="m-2">
  {@render children()}
+</section>
 
  <style>
-    h1 {
-        font-variant: small-caps;
-        color: darkgreen;
-    }
  </style>
