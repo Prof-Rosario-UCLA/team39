@@ -1,2 +1,3 @@
 
-<p class="text-center">Can you guess the country? Play now!</p>
+<p class="text-center">Can you guess the country? <a href="/play" class="text-blue-600 underline">Play</a> now!</p>
+

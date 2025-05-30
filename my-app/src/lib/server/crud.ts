@@ -1,7 +1,7 @@
 import { db } from "./db";
-import { userTable, sessionTable } from "./schema";
+import { userTable, sessionTable, factTable} from "./schema";
 import type { User } from "./schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 //Methods for CRUD opertaions on the database
 
 //Tested... returns entire row that has this id
@@ -16,4 +16,9 @@ export async function createUser(googleUserId: string, name: string): Promise<Us
         name: name
     }).returning()
     return user[0] ?? null;
+}
+
+export async function getCountryFacts(countryId: number){
+    console.log(countryId);
+    return await db.select().from(factTable).where(eq(factTable.countryId, countryId)).orderBy(desc(factTable.difficulty));
 }
