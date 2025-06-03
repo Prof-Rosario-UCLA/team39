@@ -46,5 +46,6 @@ export const factTable = pgTable(
 
 export type User = InferSelectModel<typeof userTable>;
 export type Session = InferSelectModel<typeof sessionTable>;
+export type Country = InferSelectModel<typeof countryTable>;
 export type Fact = InferSelectModel<typeof factTable>;
 export type NewFact = Omit<Fact, 'id'>

@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
+		"start": "node build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -13,6 +14,7 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^6.0.0",
+		"@sveltejs/adapter-node": "^5.2.12",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"@tailwindcss/forms": "^0.5.9",
@@ -34,6 +36,8 @@
 		"@pilcrowjs/object-parser": "^0.0.4",
 		"@tailwindcss/vite": "^4.1.8",
 		"arctic": "^3.7.0",
+		"denque": "^2.1.0",
+		"dexie": "^4.0.11",
 		"dotenv": "^16.5.0",
 		"drizzle-orm": "^0.43.1",
 		"tailwindcss": "^4.1.8"

@@ -1,13 +1,20 @@
-import { db } from '$lib/server/db';
-import { getCountryFacts } from '$lib/server/crud';
+import { getCountryFacts, getRandomCountry, getCountries, getCountryByID } from '$lib/server/crud';
+import type { Country } from '$lib/server/schema';
 import type { PageServerLoad } from '../$types';
-import { maxCountryID, getRandomIntInclusive } from '$lib/helper';
 
 export const load: PageServerLoad = async ({ params }) => {
-    const id = getRandomIntInclusive(1, maxCountryID)
-	//Currently hardcoded
-    const facts = await getCountryFacts(4)
+  
+    //Fetch Data
+	const country = await getCountryByID(4);
+	const facts = await getCountryFacts(country[0].id);
+	const countries: Country[] = await getCountries();
+
+	//Return Data
 	return {
-		facts: facts
+		country: country[0],
+		facts: facts,
+		countries: countries
 	};
+
+
 };

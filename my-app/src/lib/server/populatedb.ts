@@ -16,14 +16,25 @@ export async function populateCountries(): Promise<void>{
     console.log(Object.keys(countries).length);
 }
 
-export async function populateCountryCapital(): Promise<void>{
-    //Populates the fact table with the capitals
-    for(const country of countries){
-        const name = country.name.common;
-        console.log(country);
-        break;
+export async function populateFacts(): Promise<void>{
+    //Populates the fact tables using the API
+    const countriesFromDB = await db.select().from(countryTable);
 
+    //Create a country common name to id map 
+    const name_to_id = new Map<string, number>()
+    for(const country of countriesFromDB){
+        name_to_id.set(country.name, country.id);
     }
+    //Iterating through the API results
+    for(const country of countries){
+        const capital: Array<string> = country.capital;
+        const landlocked: boolean = country.landlocked;
+        const area_km_squared: number = country.area;
+        const population: number = country.population;
+        const region: string = country.region;
+        const subregion: string = country.subregion;
+    }
+    console.log(countriesFromDB);
 }
 
 export async function insertFact(fact: any): Promise<void>{
@@ -59,7 +70,7 @@ async function enterFacts(){
 }
 
 async function main(){
-    await enterFacts();
+    await populateFacts();
 }
 
 main()
