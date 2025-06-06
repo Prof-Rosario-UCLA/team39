@@ -1,23 +1,26 @@
 import Dexie, {type Table } from 'dexie';
-import type { Country, Fact } from './server/schema';
+import type { Fact } from './server/schema';
+import type { CountryPicker } from '@yusifaliyevpro/countries/types';
+import { defineFields } from '@yusifaliyevpro/countries';
+export const restCountryFields = defineFields(["cca3", "name", "capital", "region", "subregion", "languages", "landlocked", "area", "flag", "population", "timezones", "continents", "flags"]);
+export type Country = CountryPicker<typeof restCountryFields>;
 
 export class CountriesDatabase extends Dexie {
-  countries!: Table<Country, number>;
+  countries!: Table<Country, string>;
   facts!: Table<Fact, number>;
 
   constructor () {
     super('CountriesDatabase');
 
     this.version(1).stores({
-      countries: 'id',
-      facts: 'id, countryId, difficulty'
+      countries: 'cca3',
+      facts: 'id, cca3'
     });
   }
 }
 
-export const db = new CountriesDatabase();
+export const idb = new CountriesDatabase();
 
 //TODO: Insert countries table into the DB
-
 
 //TODO: Insert facts table into the DB

@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp, pgEnum, numeric, check} from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, timestamp, pgEnum, numeric, check, index, char} from "drizzle-orm/pg-core";
 import type { InferSelectModel } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
@@ -20,7 +20,7 @@ export const sessionTable = pgTable("session", {
 });
 
 export const countryTable = pgTable("country", {
-	id: serial("id").primaryKey(),
+	cca3: char("cca3", {length: 3}).primaryKey(),
 	name: text("name")
 		.notNull()
 		.unique()
@@ -32,15 +32,18 @@ export const factTable = pgTable(
 	"fact", 
 	{
 	id: serial("id").primaryKey(),
-	countryId: integer("country_id")
+	cca3: char("cca3", {length: 3})
 		.notNull()
-		.references(() => countryTable.id),
+		.unique()
+		.references(() => countryTable.cca3),
 	fact: text("fact").notNull(),
 	difficulty: numeric("difficulty", {precision: 3, scale: 1}).default("0"),
 	category: categoryEnum()
 	}, 
 	(table) => [
     	check("difficulty_check", sql`${table.difficulty} >= 0 AND ${table.difficulty} <= 10`),
+		index("cca3_index").on(table.cca3),
+		index("category_index").on(table.category)
   	]
 );
 
@@ -48,4 +51,3 @@ export type User = InferSelectModel<typeof userTable>;
 export type Session = InferSelectModel<typeof sessionTable>;
 export type Country = InferSelectModel<typeof countryTable>;
 export type Fact = InferSelectModel<typeof factTable>;
-export type NewFact = Omit<Fact, 'id'>
