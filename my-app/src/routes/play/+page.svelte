@@ -50,14 +50,13 @@
             countries = await idbManager.getCountrys();
             console.log("populated countries...")
         }
-        
-        //TODO: Get state
-        //Implement getFacts to only get currFacts, idbManager must handle random choosing logic
+        //Get state
         console.log("fetching state...")
         const state: gameState = (await idbManager.getState()).value;
-        console.log(state);
         countriesGuessed = codesToCountrys(state.countriesGuessed);
         currCountry = codeToCountry(state.currCountry);
+        //Get facts
+        currFacts = await idbManager.getFacts(state.currCountry);
     })
 
     //Update state
@@ -65,7 +64,8 @@
         if(currCountry && countriesGuessed){
             const state: gameState  = {
                 currCountry: currCountry.cca3,
-                countriesGuessed: countriesGuessed.map(item => item.cca3)
+                countriesGuessed: countriesGuessed.map(item => item.cca3),
+                currFactsPtr: currFactsPtr
             };
    
             (async () => {
@@ -75,12 +75,10 @@
                 }
                 catch(err){
                     console.log("failed to update state in idb: ", err);
-                }
-                
+                } 
             })();
         }
 	});
-    
     // async function fetchNextCountry(): Promise<boolean> {
     //     //Fetches next country using randomized countryIdQueue, push it onto countryqueue
 
@@ -164,21 +162,33 @@
     //     showAnswer = false;
     // }
 
-    function getNewCountry(){
+    async function getNewCountry(){
+        console.log("GAMEPLAY: GETTING NEW COUNTRIES")
         //Get a new country from countries left
         currCountry = countriesLeft[(getRandomInt(0, countriesLeft.length))];
-        //Update facts
+        await getNewFacts();
+        console.log("GAMEPLAY: RESETTING CURRFACTSPTR")
+        currFactsPtr = 0;
+    }
+    async function getNewFacts(){
+        console.log("GAMEPLAY: GETTING NEW FACTS")
+        if(currCountry){
+            currFacts = await idbManager.getFacts(currCountry?.cca3);
+        } 
     }
     async function handleLoss(){
         if(currCountry){
             countriesGuessed.push(currCountry);
-            getNewCountry();
+            //Get new countries and facts
+            await getNewCountry();
         }
-        //Reset currFactsPtr
-        currFactsPtr = 0;
+    }
+    async function resetState(){
+        countriesGuessed = [];
+        await idbManager.clearState();
     }
     function nextFact(){
-        console.log("incremeneting currFactsPtrs")
+        console.log("GAMEPLAY: incremeting currFactsPtrs")
         currFactsPtr+=1;
         console.log(currFactsPtr)
     }
@@ -239,7 +249,8 @@
               <p>{fact.fact}</p>
         {/each}
       
-        <section class="table-section flex flex-row">
+        <section class="table-section">
+            <button class="rounded-md bg-blue-50 p-4 " onclick={resetState}>Reset</button>
             <table class="table-auto m-4">
                 <thead>
                     <tr>

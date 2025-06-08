@@ -12,14 +12,17 @@ export class IdbManager {
     async getCountrys(): Promise<Country[]> {
         return this.#idb.countries.toArray();
     }
-    async getFacts(): Promise<any>{
-        return this.#idb.facts.toArray();
+    async getFacts(cca3: string): Promise<any>{
+        return this.#idb.facts.where('cca3').equals(cca3).toArray();
     }
     async getState(): Promise<any>{
         return this.#idb.meta.get({key: "state"});
     }
     async updateState(state: gameState): Promise<void>{
         this.#idb.meta.put({key:"state", value: state});
+    }
+    async clearState(): Promise<void>{
+        this.#idb.meta.delete("state");
     }
     /**
      * Ensures valid data is in the cache and it hasn't expired
@@ -50,7 +53,8 @@ export class IdbManager {
             const initGameState: gameState = {
                 //random country code
                 currCountry: randomKey,
-                countriesGuessed: []
+                countriesGuessed: [],
+                currFactsPtr: 0
             }
             await this.#idb.meta.put({key:"state", value: initGameState});
             console.log("initialized game state...")
