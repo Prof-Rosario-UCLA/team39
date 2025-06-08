@@ -1,10 +1,10 @@
 
 export const maxCountryID = 195;
 
-export function getRandomIntInclusive(min: number, max: number) {
+export function getRandomInt(min: number, max: number) {
   const minCeiled = Math.ceil(min);
   const maxFloored = Math.floor(max);
-  return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // The maximum is inclusive and the minimum is inclusive
+  return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is inclusive and the minimum is inclusive
 }
 
 export function KnuthShuffle(arr: Array<any>): Array<any>{
@@ -18,4 +18,13 @@ export function KnuthShuffle(arr: Array<any>): Array<any>{
     arr[j] = temp;
   }
   return arr;
+}
+
+export function objectArrayDifference<T, K extends keyof T>(
+  a: T[],
+  b: T[],
+  key: K
+) : T[] {
+  const bSet = new Set(b.map(item => item[key]));
+  return a.filter(item => {!bSet.has(item[key])})
 }

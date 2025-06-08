@@ -23,5 +23,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	event.locals.session = session;
 	event.locals.user = user;
+
+	//Supress chrome dev tools error
+	if (
+		event.url.pathname.startsWith(
+			'/.well-known/appspecific/com.chrome.devtools'
+		)
+	) {
+		return new Response(null, { status: 204 }); // Return empty response with 204 No Content
+	}
+
+
 	return resolve(event);
+
+
 };

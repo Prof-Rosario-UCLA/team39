@@ -8,19 +8,18 @@ export type Country = CountryPicker<typeof restCountryFields>;
 export class CountriesDatabase extends Dexie {
   countries!: Table<Country, string>;
   facts!: Table<Fact, number>;
+  meta!: Table<{key: string, value: Date}, string>
 
   constructor () {
     super('CountriesDatabase');
 
     this.version(1).stores({
       countries: 'cca3',
-      facts: 'id, cca3'
+      facts: 'id, cca3',
+      meta: 'key'
     });
   }
 }
 
 export const idb = new CountriesDatabase();
 
-//TODO: Insert countries table into the DB
-
-//TODO: Insert facts table into the DB

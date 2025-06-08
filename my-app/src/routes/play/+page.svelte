@@ -1,28 +1,42 @@
 <script lang="ts">
     import { onMount } from 'svelte';
 	import type { PageProps } from './$types';
-    import { KnuthShuffle } from '$lib/helper';
     import Search from '../../components/Search.svelte';
 	let { data }: PageProps = $props();
     import { fade } from 'svelte/transition';
     import Denque from 'denque';
-    import { idb } from '$lib/dexie';
+    import { idb, type Country } from '$lib/dexie';
+    import type { Fact } from '$lib/server/schema';
+    import { getRandomInt } from '$lib/helper';
 
-    //Game logic
+
     let answer = $state("");
     let correct = $state(false);
     let showAnswer = $state(false);
-    //Countries array
-    const countries = data.countries;
-    
-    //Generate an array of all country IDs minus the inital country fetched and perform Knuth Shuffle
-    // const countryIdQueue = new Denque(KnuthShuffle([...Array(196).keys()].slice(1).filter((x)=> x != currCountry.id)));
 
-    //Use a queue to hold prefetched countries
-    const countryQueue = new Denque();
+    const idbManager = data.idbManager;
 
-    //Stores only country strings
-    const countriesGuessed = $state(Array<[string, boolean]>());
+    let countries: Country[] = $state([]);
+    let countriesGuessed: Country[] = $state([]);
+    let facts: Fact[] = $state([]);
+
+    let countriesGuessedSet = $derived(new Set(countriesGuessed.map(item => item.cca3)))
+    let countriesLeft = $derived(countries.filter(item => !countriesGuessedSet.has(item.cca3))); 
+    let currCountry = $derived(countriesLeft.at(getRandomInt(0, countriesLeft.length)));
+    let currFacts = $derived(facts.filter(fact => fact.cca3 === currCountry?.cca3));
+    let currFactsPtr = $state(0);
+
+    //Initialize data using idb
+    onMount(async() =>{
+        if(countries.length === 0){
+            countries = await idbManager.getCountrys();
+            console.log("populated countries...")
+        }
+        if(facts.length === 0){
+            facts = await idbManager.getFacts();
+            console.log("populated facts...")
+        }
+    })
     
     // async function fetchNextCountry(): Promise<boolean> {
     //     //Fetches next country using randomized countryIdQueue, push it onto countryqueue
@@ -63,10 +77,10 @@
     //     await fetchNextCountry();
     // }
 
-    //Search logic
+    //________ Search logic _________
     let searchTerm = $state("");
     let inputSelected = $state(false);
-    let filteredCountries = $state(countries);
+    let filteredCountries: Country[] = $derived(countriesLeft);
 
     function handleFocus() {
         console.log("HF")
@@ -76,21 +90,16 @@
         console.log("HB")
         inputSelected = false;
     }
-    // function handleResultMouseDown(res:any) {
-    //     answer = res.name;
-    //     checkAnswer(res.id);
-    //     console.log("HRMD");
-    // }
-
-    // const searchCountries = () => {
-    //     return filteredCountries = countries.filter(country => {
-	// 		let countryName = country.name.toLowerCase();
-	// 		return countryName.includes(searchTerm.toLowerCase());
-	// 	});
-    // }
-
-    function wait(ms: number) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+    function handleResultMouseDown(res:any) {
+        answer = res.name;
+        // checkAnswer(res.id);
+        console.log("HRMD");
+    }
+    const searchCountries = () => {
+        return filteredCountries = countriesLeft.filter(country => {
+			let countryName = country.name.common.toLowerCase();
+			return countryName.includes(searchTerm.toLowerCase());
+		});
     }
 
     // async function checkAnswer(id:number){
@@ -112,31 +121,22 @@
     //     showAnswer = false;
     // }
 
-    // async function handleLoss(){
-    //     countriesGuessed.push([currCountry.name, false]);
-    //     await nextCountry();
-    // }
-    // function nextFact(){
-    //     if (currFacts.isEmpty()){
-    //         //Run out of facts, you failed to guess it!
-    //         currFact = null;
-    //         console.log("Out of facts!!! You lose!!!")
-    //     } else{
-    //         const fact = currFacts.shift();
-    //         currFact = fact ? fact : null;
-    //     }
-    // }
+    async function handleLoss(){
+        if(currCountry){
+            countriesGuessed.push(currCountry);
+        }
+        //Reset currFactsPtr
+        currFactsPtr = 0;
+    }
+    function nextFact(){
+        console.log("incremeneting currFactsPtrs")
+        currFactsPtr+=1;
+        console.log(currFactsPtr)
+    }
 
     //Canvas Logic
 	onMount(async () => {
 		console.log('DOM has been mounted...');
-
-    
-        //Cache it with a TTL
-		await idb.countries.bulkPut(data.countries);
-        await idb.facts.bulkPut(data.facts);
-
-
         const myCanvas = document.getElementById("canvas") as HTMLCanvasElement;
         const ctx = myCanvas.getContext("2d");
         if(ctx){
@@ -152,20 +152,21 @@
         <section class="flex justify-center">
             <canvas id="canvas" width="300" height="150" class="">This canvas shows the game state</canvas>   
         </section>
-<!--         
-        <section id="fact" class="bg-slate-200 m-2 p-4 rounded-full ">
-            <p>{@html currFact ? currFact.fact : "Ran out of facts..."}</p>
-            {#if currFact}
+        
+        {#if countriesLeft.length > 0}
+        <section id="fact-section" class="bg-slate-200 m-2 p-4 rounded-full ">
+            <p>{ currFactsPtr < currFacts.length ? currFacts[currFactsPtr].fact : "Ran out of facts..."}</p>
+            {#if currFacts.length > 0 && currFactsPtr < currFacts.length}
             <button class="rounded-md p-2 bg-blue-300 hover:cursor-pointer" onclick={nextFact}>skip</button>
+            {:else}
+            <button class="rounded-md p-2 bg-blue-300 hover:cursor-pointer" onclick={handleLoss}>next country</button>
             {/if}
-            {#if !currFact}
-                <button class="rounded-md p-2 bg-blue-300 hover:cursor-pointer" onclick={handleLoss}>next country</button>
-            {/if}
-        </section> -->
+        </section>
+        {/if}
 
-        <!-- <section id="query-section">
+        <section id="query-section">
             <Search bind:searchTerm on:input={searchCountries} on:focus={handleFocus} on:blur={handleBlur}></Search>
-        </section> -->
+        </section>
 
         <section id="answer-section">
             {#if showAnswer}
@@ -176,15 +177,20 @@
         </section>
         
         <!-- Only show dropdown if there are still facts left -->
-        <!-- {#if inputSelected && currFact}
+        {#if inputSelected }
         <section id="results-section" class="max-h-[30vh] md:max-w-[40vw] overflow-auto m-1">
             {#each filteredCountries as res}
-                <button class="hover:bg-amber-100 hover:cursor-pointer rounded-md bg-slate-100 inline p-1 m-1" onmousedown={() => handleResultMouseDown(res)}>{res.name}</button>
+                <button class="hover:bg-amber-100 hover:cursor-pointer rounded-md bg-slate-100 inline p-1 m-1" onmousedown={() => handleResultMouseDown(res)}>{res.name.common}</button>
             {/each}
         </section>
-        {/if} -->
+        {/if}
 
-        <section class="table-section">
+        <p>{currCountry ? currCountry.name.common : "No more countries left"}</p>
+        {#each currFacts as fact}
+              <p>{fact.fact}</p>
+        {/each}
+      
+        <section class="table-section flex flex-row">
             <table class="table-auto m-4">
                 <thead>
                     <tr>
@@ -194,7 +200,7 @@
                 <tbody>
                     {#each countriesGuessed as country}
                         <tr>
-                            <td class="py-1 rounded-sm {country[1] ? "bg-green-200" : "bg-red-200"} m-2">{country[0]}</td>
+                            <td class="py-1 rounded-sm m-2">{country.name.common}</td>
                         </tr>
                     {/each}
                 </tbody>
