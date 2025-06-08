@@ -8,6 +8,7 @@
     import { idb, type Country } from '$lib/dexie';
     import type { Fact } from '$lib/server/schema';
     import { getRandomInt } from '$lib/helper';
+    import type { gameState } from '$lib/gameState';
 
 
     let answer = $state("");
@@ -18,16 +19,30 @@
 
     let countries: Country[] = $state([]);
     let countriesGuessed: Country[] = $state([]);
-    // let facts: Fact[] = $state([]);
     let currCountry: Country | undefined = $state(undefined);
+
     let currFactsPtr = $state(0);
     let currFacts: Fact[] = $state([]);
 
-    let countriesGuessedSet = $derived(new Set(countriesGuessed.map(item => item.cca3)))
+    let countriesGuessedSet = $derived(new Set(countriesGuessed.map(item => item.cca3)));
+    let countriesMap = $derived(new Map(countries.map(item => [item.cca3, item])));
     let countriesLeft = $derived(countries.filter(item => !countriesGuessedSet.has(item.cca3))); 
     // let currCountry = $derived(countriesLeft.at(getRandomInt(0, countriesLeft.length)));
     // let currFacts = $derived(facts.filter(fact => fact.cca3 === currCountry?.cca3));
 
+    function codeToCountry(cca3: string): Country | undefined {
+        return countriesMap.get(cca3);
+    }
+    function codesToCountrys(arr: Array<string>): Array<Country> {
+        let resultArray: Array<Country> = [];
+        for(const cca3 of arr){
+            const country = codeToCountry(cca3);
+            if(country){
+                resultArray.push(country);
+            }
+        }
+        return resultArray;
+    }
 
     //Initialize data using idb
     onMount(async() =>{
@@ -35,14 +50,36 @@
             countries = await idbManager.getCountrys();
             console.log("populated countries...")
         }
-        if(currFacts.length === 0){
-            //TODO:
-            //Implement getFacts to only get currFacts, idbManager must handle random choosing logic
-            currFacts = await idbManager.getFacts();
-            console.log("populated facts...")
-        }
-        currCountry = await idbManager.getState();
+        
+        //TODO: Get state
+        //Implement getFacts to only get currFacts, idbManager must handle random choosing logic
+        console.log("fetching state...")
+        const state: gameState = (await idbManager.getState()).value;
+        console.log(state);
+        countriesGuessed = codesToCountrys(state.countriesGuessed);
+        currCountry = codeToCountry(state.currCountry);
     })
+
+    //Update state
+    $effect(() => {
+        if(currCountry && countriesGuessed){
+            const state: gameState  = {
+                currCountry: currCountry.cca3,
+                countriesGuessed: countriesGuessed.map(item => item.cca3)
+            };
+   
+            (async () => {
+                try{
+                    await idbManager.updateState(state);
+                    console.log("updated state in IDB");
+                }
+                catch(err){
+                    console.log("failed to update state in idb: ", err);
+                }
+                
+            })();
+        }
+	});
     
     // async function fetchNextCountry(): Promise<boolean> {
     //     //Fetches next country using randomized countryIdQueue, push it onto countryqueue
@@ -127,9 +164,15 @@
     //     showAnswer = false;
     // }
 
+    function getNewCountry(){
+        //Get a new country from countries left
+        currCountry = countriesLeft[(getRandomInt(0, countriesLeft.length))];
+        //Update facts
+    }
     async function handleLoss(){
         if(currCountry){
             countriesGuessed.push(currCountry);
+            getNewCountry();
         }
         //Reset currFactsPtr
         currFactsPtr = 0;

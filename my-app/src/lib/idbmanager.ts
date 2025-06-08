@@ -1,5 +1,6 @@
 import { CountriesDatabase } from "./dexie";
 import type { Country } from "./dexie";
+import type { gameState } from "./gameState";
 import type { Fact } from "./server/schema";
 
 export class IdbManager {
@@ -15,7 +16,10 @@ export class IdbManager {
         return this.#idb.facts.toArray();
     }
     async getState(): Promise<any>{
-        return this.#idb.state.toArray();
+        return this.#idb.meta.get({key: "state"});
+    }
+    async updateState(state: gameState): Promise<void>{
+        this.#idb.meta.put({key:"state", value: state});
     }
     /**
      * Ensures valid data is in the cache and it hasn't expired
@@ -35,6 +39,21 @@ export class IdbManager {
         else{
             //Fetch and insert data
             this.fetchAndCache();
+        }
+        //Initialize game state if necessary
+        const state = await this.#idb.meta.get({key: "state"});
+
+        if(!state){
+            //Pick a random country
+            const allKeys = await this.#idb.countries.toCollection().primaryKeys();
+            const randomKey = allKeys[Math.floor(Math.random() * allKeys.length)];
+            const initGameState: gameState = {
+                //random country code
+                currCountry: randomKey,
+                countriesGuessed: []
+            }
+            await this.#idb.meta.put({key:"state", value: initGameState});
+            console.log("initialized game state...")
         }
     } 
     /**
