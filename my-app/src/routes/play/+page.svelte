@@ -18,13 +18,16 @@
 
     let countries: Country[] = $state([]);
     let countriesGuessed: Country[] = $state([]);
-    let facts: Fact[] = $state([]);
+    // let facts: Fact[] = $state([]);
+    let currCountry: Country | undefined = $state(undefined);
+    let currFactsPtr = $state(0);
+    let currFacts: Fact[] = $state([]);
 
     let countriesGuessedSet = $derived(new Set(countriesGuessed.map(item => item.cca3)))
     let countriesLeft = $derived(countries.filter(item => !countriesGuessedSet.has(item.cca3))); 
-    let currCountry = $derived(countriesLeft.at(getRandomInt(0, countriesLeft.length)));
-    let currFacts = $derived(facts.filter(fact => fact.cca3 === currCountry?.cca3));
-    let currFactsPtr = $state(0);
+    // let currCountry = $derived(countriesLeft.at(getRandomInt(0, countriesLeft.length)));
+    // let currFacts = $derived(facts.filter(fact => fact.cca3 === currCountry?.cca3));
+
 
     //Initialize data using idb
     onMount(async() =>{
@@ -32,10 +35,13 @@
             countries = await idbManager.getCountrys();
             console.log("populated countries...")
         }
-        if(facts.length === 0){
-            facts = await idbManager.getFacts();
+        if(currFacts.length === 0){
+            //TODO:
+            //Implement getFacts to only get currFacts, idbManager must handle random choosing logic
+            currFacts = await idbManager.getFacts();
             console.log("populated facts...")
         }
+        currCountry = await idbManager.getState();
     })
     
     // async function fetchNextCountry(): Promise<boolean> {

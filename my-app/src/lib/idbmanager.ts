@@ -14,6 +14,9 @@ export class IdbManager {
     async getFacts(): Promise<any>{
         return this.#idb.facts.toArray();
     }
+    async getState(): Promise<any>{
+        return this.#idb.state.toArray();
+    }
     /**
      * Ensures valid data is in the cache and it hasn't expired
      */

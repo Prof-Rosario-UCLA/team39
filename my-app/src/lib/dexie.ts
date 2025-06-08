@@ -5,6 +5,7 @@ import { defineFields } from '@yusifaliyevpro/countries';
 export const restCountryFields = defineFields(["cca3", "name", "capital", "region", "subregion", "languages", "landlocked", "area", "flag", "population", "timezones", "continents", "flags"]);
 export type Country = CountryPicker<typeof restCountryFields>;
 
+//TODO add a gamestate table
 export class CountriesDatabase extends Dexie {
   countries!: Table<Country, string>;
   facts!: Table<Fact, number>;
