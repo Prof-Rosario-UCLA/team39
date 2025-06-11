@@ -19,7 +19,7 @@
 
     let countries: Country[] = $state([]);
     let countriesGuessed: Country[] = $state([]);
-    let currCountry: Country | undefined = $state(undefined);
+    let currCountry: Country | undefined  = $state(undefined);
 
     let currFactsPtr = $state(0);
     let currFacts: Fact[] = $state([]);
@@ -43,41 +43,51 @@
         }
         return resultArray;
     }
+    function randomCountry(){
+        //Return a random country from countries
+        return countries[Math.floor(Math.random() * countries.length)];
+    }
 
     //Initialize data using idb
     onMount(async() =>{
         if(countries.length === 0){
             countries = await idbManager.getCountrys();
-            console.log("populated countries...")
+            console.log("populated countries...");
         }
         //Get state
-        console.log("fetching state...")
+        console.log("fetching state...");
         const state: gameState = (await idbManager.getState()).value;
         countriesGuessed = codesToCountrys(state.countriesGuessed);
-        currCountry = codeToCountry(state.currCountry);
-        //Get facts
-        currFacts = await idbManager.getFacts(state.currCountry);
+        if (state.currCountry){
+            currCountry = codeToCountry(state.currCountry);
+            //Get facts
+            console.log("getting facts...");
+            if(currCountry){
+                currFacts = await idbManager.getFacts(currCountry?.cca3);
+            }
+        }
+        else{
+            currCountry = undefined;
+        }
     })
 
     //Update state
     $effect(() => {
-        if(currCountry && countriesGuessed){
-            const state: gameState  = {
-                currCountry: currCountry.cca3,
-                countriesGuessed: countriesGuessed.map(item => item.cca3),
-                currFactsPtr: currFactsPtr
-            };
-   
-            (async () => {
-                try{
-                    await idbManager.updateState(state);
-                    console.log("updated state in IDB");
-                }
-                catch(err){
-                    console.log("failed to update state in idb: ", err);
-                } 
-            })();
-        }
+        const state: gameState  = {
+            currCountry: currCountry ? currCountry.cca3 : currCountry,
+            countriesGuessed: countriesGuessed.map(item => item.cca3),
+            currFactsPtr: currFactsPtr
+        };
+
+        (async () => {
+            try{
+                await idbManager.updateState(state);
+                console.log("updated state in IDB");
+            }
+            catch(err){
+                console.log("failed to update state in idb: ", err);
+            } 
+        })();
 	});
     // async function fetchNextCountry(): Promise<boolean> {
     //     //Fetches next country using randomized countryIdQueue, push it onto countryqueue
@@ -185,7 +195,7 @@
     }
     async function resetState(){
         countriesGuessed = [];
-        await idbManager.clearState();
+        currCountry = randomCountry();
     }
     function nextFact(){
         console.log("GAMEPLAY: incremeting currFactsPtrs")

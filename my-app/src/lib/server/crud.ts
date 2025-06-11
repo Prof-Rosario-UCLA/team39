@@ -1,6 +1,5 @@
 import { db } from "./db";
 import { userTable, sessionTable, factTable, countryTable} from "./schema";
-import { getRandomIntInclusive, maxCountryID } from "$lib/helper";
 import type { User } from "./schema";
 import { eq, desc } from "drizzle-orm";
 //Methods for CRUD opertaions on the database

@@ -3,7 +3,6 @@
 
 console.log("Running index.ts...");
 
-
 console.log("Finished running index.ts...")
 
 

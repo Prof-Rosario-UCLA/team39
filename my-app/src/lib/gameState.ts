@@ -4,6 +4,6 @@
 
 export interface gameState {
     countriesGuessed: Array<string>,
-    currCountry: string,
+    currCountry: string | undefined,
     currFactsPtr: number
 }

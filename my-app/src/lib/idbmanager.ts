@@ -23,6 +23,19 @@ export class IdbManager {
     }
     async clearState(): Promise<void>{
         this.#idb.meta.delete("state");
+        this.initState();
+    }
+    async initState(): Promise<void>{
+        const allKeys = await this.#idb.countries.toCollection().primaryKeys();
+        const randomKey = allKeys[Math.floor(Math.random() * allKeys.length)];
+        const initGameState: gameState = {
+            //random country code
+            currCountry: randomKey,
+            countriesGuessed: [],
+            currFactsPtr: 0
+        }
+        await this.#idb.meta.put({key:"state", value: initGameState});
+        console.log("initialized game state...")
     }
     /**
      * Ensures valid data is in the cache and it hasn't expired
@@ -48,16 +61,7 @@ export class IdbManager {
 
         if(!state){
             //Pick a random country
-            const allKeys = await this.#idb.countries.toCollection().primaryKeys();
-            const randomKey = allKeys[Math.floor(Math.random() * allKeys.length)];
-            const initGameState: gameState = {
-                //random country code
-                currCountry: randomKey,
-                countriesGuessed: [],
-                currFactsPtr: 0
-            }
-            await this.#idb.meta.put({key:"state", value: initGameState});
-            console.log("initialized game state...")
+           await this.initState();
         }
     } 
     /**
