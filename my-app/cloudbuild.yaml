@@ -1,10 +1,14 @@
 steps:
-  - name: 'gcr.io/cloud-builders/npm'
+  - name: 'node:20'  # Use supported Node version
+    entrypoint: npm
     dir: 'my-app'
     args: ['install'] # npm install
-  - name: 'gcr.io/cloud-builders/npm'
+    
+  - name: 'node:20'  # Use supported Node version
+    entrypoint: npm
     dir: 'my-app'
     args: ['run', 'build'] # If using a build step: npm run build
+
   - name: 'gcr.io/cloud-builders/gcloud'
     dir: 'my-app'
     args: ['app', 'deploy', '--quiet'] # gcloud app deploy
