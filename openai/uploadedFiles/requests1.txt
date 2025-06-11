@@ -1,0 +1,11 @@
+{
+  object: 'file',
+  id: 'file-SLSpcTKi5WBqwHmFom9pAV',
+  purpose: 'batch',
+  filename: 'requests-v1.jsonl',
+  bytes: 419462,
+  created_at: 1749619576,
+  expires_at: null,
+  status: 'processed',
+  status_details: null
+}
