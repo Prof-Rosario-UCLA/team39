@@ -5,5 +5,4 @@ steps:
     args: ['run', 'build'] # If using a build step: npm run build
   - name: 'gcr.io/cloud-builders/gcloud'
     args: ['app', 'deploy', '--quiet'] # gcloud app deploy
-logging: CLOUD_LOGGING_ONLY
 timeout: '900s'
