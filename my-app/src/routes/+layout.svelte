@@ -13,7 +13,7 @@
 
 <nav class="flex justify-around p-2 bg-slate-100">
     <div>
-        <a href="/" class="text-green-800 text-2xl">CountryGUESSR</a>
+        <a href="/" class="text-cyan-800 text-3xl">CountryGUESSR</a>
     </div>
      <div class="wide-menu">
                 <a href="/profile" class="underline">Profile</a>
