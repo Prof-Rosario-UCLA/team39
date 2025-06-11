@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head> -->
 
-<nav class="flex justify-around p-2">
+<nav class="flex justify-around p-2 bg-slate-100">
     <div>
         <a href="/" class="text-green-800 text-2xl">CountryGUESSR</a>
     </div>
@@ -20,7 +20,7 @@
     </div>
 </nav>
 
-<section id="center-screen" class="m-2">
+<section id="center-screen" class="m-2 max-h-[90vh] overflow-auto">
  {@render children()}
 </section>
 

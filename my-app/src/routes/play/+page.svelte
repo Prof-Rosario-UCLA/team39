@@ -218,7 +218,7 @@
 
 </script>
 
-<section id="gameplay" class="flex justify-center">
+<section id="gameplay" class="flex justify-center pt-3">
     <div class="flex-col md:min-w-[40vw]">
 
         <section class="flex justify-center">
