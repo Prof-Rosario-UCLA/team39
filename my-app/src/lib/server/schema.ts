@@ -34,11 +34,10 @@ export const factTable = pgTable(
 	id: serial("id").primaryKey(),
 	cca3: char("cca3", {length: 3})
 		.notNull()
-		.unique()
 		.references(() => countryTable.cca3),
 	fact: text("fact").notNull(),
 	difficulty: numeric("difficulty", {precision: 3, scale: 1}).default("0"),
-	category: categoryEnum()
+	category: text("category")
 	}, 
 	(table) => [
     	check("difficulty_check", sql`${table.difficulty} >= 0 AND ${table.difficulty} <= 10`),
