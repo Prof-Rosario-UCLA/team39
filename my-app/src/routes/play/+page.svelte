@@ -9,6 +9,7 @@
     import type { Fact } from '$lib/server/schema';
     import { getRandomInt } from '$lib/helper';
     import type { gameState } from '$lib/gameState';
+    import { ConsoleLogWriter } from 'drizzle-orm';
 
 
     let answer = $state("");
@@ -20,15 +21,12 @@
     let countries: Country[] = $state([]);
     let countriesGuessed: Country[] = $state([]);
     let currCountry: Country | undefined  = $state(undefined);
-
     let currFactsPtr = $state(0);
     let currFacts: Fact[] = $state([]);
 
     let countriesGuessedSet = $derived(new Set(countriesGuessed.map(item => item.cca3)));
     let countriesMap = $derived(new Map(countries.map(item => [item.cca3, item])));
     let countriesLeft = $derived(countries.filter(item => !countriesGuessedSet.has(item.cca3))); 
-    // let currCountry = $derived(countriesLeft.at(getRandomInt(0, countriesLeft.length)));
-    // let currFacts = $derived(facts.filter(fact => fact.cca3 === currCountry?.cca3));
 
     function codeToCountry(cca3: string): Country | undefined {
         return countriesMap.get(cca3);
@@ -50,6 +48,7 @@
 
     //Initialize data using idb
     onMount(async() =>{
+        console.log("onMount()...");
         if(countries.length === 0){
             countries = await idbManager.getCountrys();
             console.log("populated countries...");
@@ -57,37 +56,50 @@
         //Get state
         console.log("fetching state...");
         const state: gameState = (await idbManager.getState()).value;
+        console.log(state)
         countriesGuessed = codesToCountrys(state.countriesGuessed);
-        if (state.currCountry){
+        if(state.currCountry){
+            //If state is a country.
             currCountry = codeToCountry(state.currCountry);
-            //Get facts
-            console.log("getting facts...");
-            if(currCountry){
-                currFacts = await idbManager.getFacts(currCountry?.cca3);
-            }
+        }else if(!state.currCountry && countriesGuessed.length === 0){
+            //If we're in initial state.
+            currCountry = randomCountry();
+        }else{
+            //If we've guessed countries but currCountry is undefined, only happens when all countries are guessed.
+            currCountry = undefined;
+        }
+        //Get facts
+        if(currCountry){
+            currFacts = await idbManager.getFacts(currCountry?.cca3);
+            console.log("got facts...");
         }
         else{
-            currCountry = undefined;
+            console.log("currCountry is undefined... no facts");
         }
     })
 
     //Update state
     $effect(() => {
-        const state: gameState  = {
+        if(!currCountry && countries.length === 0){
+            ;
+        } else {
+            //Only update state if it's not initial state...
+            const state: gameState  = {
             currCountry: currCountry ? currCountry.cca3 : currCountry,
             countriesGuessed: countriesGuessed.map(item => item.cca3),
             currFactsPtr: currFactsPtr
-        };
+            };
 
-        (async () => {
-            try{
-                await idbManager.updateState(state);
-                console.log("updated state in IDB");
-            }
-            catch(err){
-                console.log("failed to update state in idb: ", err);
-            } 
-        })();
+            (async () => {
+                try{
+                    await idbManager.updateState(state);
+                    console.log("updated state in IDB");
+                }
+                catch(err){
+                    console.log("failed to update state in idb: ", err);
+                } 
+            })();
+        }     
 	});
     // async function fetchNextCountry(): Promise<boolean> {
     //     //Fetches next country using randomized countryIdQueue, push it onto countryqueue
@@ -260,7 +272,7 @@
         {/each}
       
         <section class="table-section">
-            <button class="rounded-md bg-blue-50 p-4 " onclick={resetState}>Reset</button>
+            <button class="rounded-md bg-red-500 p-4 " onclick={resetState}>Reset</button>
             <table class="table-auto m-4">
                 <thead>
                     <tr>

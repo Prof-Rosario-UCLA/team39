@@ -26,16 +26,16 @@ export class IdbManager {
         this.initState();
     }
     async initState(): Promise<void>{
-        const allKeys = await this.#idb.countries.toCollection().primaryKeys();
-        const randomKey = allKeys[Math.floor(Math.random() * allKeys.length)];
+        // const allKeys = await this.#idb.countries.toCollection().primaryKeys();
+        // const randomKey = allKeys[Math.floor(Math.random() * allKeys.length)];
         const initGameState: gameState = {
             //random country code
-            currCountry: randomKey,
+            currCountry: undefined,
             countriesGuessed: [],
             currFactsPtr: 0
         }
         await this.#idb.meta.put({key:"state", value: initGameState});
-        console.log("initialized game state...")
+        console.log("initialized game state...", initGameState);
     }
     /**
      * Ensures valid data is in the cache and it hasn't expired
@@ -54,7 +54,7 @@ export class IdbManager {
         }
         else{
             //Fetch and insert data
-            this.fetchAndCache();
+            await this.fetchAndCache();
         }
         //Initialize game state if necessary
         const state = await this.#idb.meta.get({key: "state"});
