@@ -30,6 +30,9 @@ export async function createUser(googleUserId: string, name: string): Promise<Us
 export async function getFacts(){
     return await db.select().from(factTable);
 }
+export async function getFactsByID(cca3:string){
+    return await db.select().from(factTable).where(eq(factTable.cca3, cca3));
+}
 
 export async function getCountries(){
     return await db.select().from(countryTable);

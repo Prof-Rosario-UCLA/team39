@@ -126,7 +126,7 @@
 	});
 
     let canvas: HTMLCanvasElement;
-    let showFlag = $derived((currFactsPtr === currFacts.length) || (showAnswer && correct));
+    let showFlag = $derived(currCountry && (currFactsPtr === currFacts.length) || (showAnswer && correct));
 
     $effect(() => {
         const country = currCountry;
