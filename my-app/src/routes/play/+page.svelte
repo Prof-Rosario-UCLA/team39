@@ -230,14 +230,14 @@
 </script>
 
 <section id="gameplay" class="flex justify-center pt-3 flex-col md:flex-row md:justify-evenly">
-    <div class="flex md:min-w-[40vw]">
+    <div class="flex md:min-w-[40vw] md:max-w-[50vw]">
         <section id="main-gampeplay">
             <section id="canvas-section"class="flex justify-center">
                 <canvas id="canvas" width="300" height="150" bind:this={canvas}>This canvas shows the game state</canvas>   
             </section>
             
             {#if countriesLeft.length > 0}
-            <section id="fact-section" class="bg-slate-200 m-2 p-4 md:max-w-[50vw]">
+            <section id="fact-section" class="bg-slate-200 m-2 p-4 md:max-w-[50vw] md:min-w[50vw]">
                 <div class="md:w-[500px] break-words whitespace-normal">
                     <p>{@html currFactsPtr < currFacts.length ? currFacts[currFactsPtr].fact : `You did not guess it! The country was: ${currCountry?.name.common}`}</p>
                 </div>
@@ -253,7 +253,7 @@
                 <button class="rounded-md bg-red-400 p-2 cursor-pointer" onclick={resetState}>Reset</button>
             </section>
 
-            <section id="query-section">
+            <section id="query-section md:max-w-[40vw]">
                 <Search bind:searchTerm on:input={searchCountries} on:focus={handleFocus} on:blur={handleBlur}></Search>
             </section>
 
@@ -267,7 +267,7 @@
             
             <!-- Only show dropdown if there are still facts left -->
             {#if inputSelected }
-            <section id="results-section" class="max-h-[30vh] md:max-w-[40vw] overflow-auto m-1">
+            <section id="results-section" class="max-h-[30vh] md:max-w-[35vw] overflow-auto m-1 break-words">
                 {#each filteredCountries as res}
                     <button class="hover:bg-amber-100 hover:cursor-pointer rounded-md bg-slate-100 inline p-1 m-1" onmousedown={() => handleResultMouseDown(res)}>{res.name.common}</button>
                 {/each}
