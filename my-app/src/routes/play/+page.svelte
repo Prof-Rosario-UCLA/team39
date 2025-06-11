@@ -272,7 +272,7 @@
         {/each}
       
         <section class="table-section">
-            <button class="rounded-md bg-red-500 p-4 " onclick={resetState}>Reset</button>
+            <button class="rounded-md bg-purple-500 p-4 " onclick={resetState}>Reset</button>
             <table class="table-auto m-4">
                 <thead>
                     <tr>
